@@ -464,13 +464,13 @@ struct KAWAIIPHYSICS_API FKawaiiPhysicsModifyBone
 UENUM()
 enum class EXPBDComplianceType : uint8
 {
-	Concrete UMETA(DisplayName = "Concrete"),
-	Wood UMETA(DisplayName = "Wood"),
-	Leather UMETA(DisplayName = "Leather"),
-	Tendon UMETA(DisplayName = "Tendon"),
-	Rubber UMETA(DisplayName = "Rubber"),
-	Muscle UMETA(DisplayName = "Muscle"),
-	Fat UMETA(DisplayName = "Fat"),
+	Concrete UMETA(DisplayName = "Concrete"), // 具体
+	Wood UMETA(DisplayName = "Wood"), // 木头
+	Leather UMETA(DisplayName = "Leather"), // 皮革
+	Tendon UMETA(DisplayName = "Tendon"), // 肌腱
+	Rubber UMETA(DisplayName = "Rubber"), // 橡胶
+	Muscle UMETA(DisplayName = "Muscle"), // 肌肉
+	Fat UMETA(DisplayName = "Fat"), // 脂肪
 };
 
 /**
