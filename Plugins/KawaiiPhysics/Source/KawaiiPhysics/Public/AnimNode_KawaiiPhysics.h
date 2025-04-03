@@ -473,13 +473,13 @@ struct KAWAIIPHYSICS_API FKawaiiPhysicsModifyBone
 UENUM()
 enum class EXPBDComplianceType : uint8
 {
-	Concrete UMETA(DisplayName = "Concrete"),
-	Wood UMETA(DisplayName = "Wood"),
-	Leather UMETA(DisplayName = "Leather"),
-	Tendon UMETA(DisplayName = "Tendon"),
-	Rubber UMETA(DisplayName = "Rubber"),
-	Muscle UMETA(DisplayName = "Muscle"),
-	Fat UMETA(DisplayName = "Fat"),
+	Concrete UMETA(DisplayName = "Concrete"), // 具体
+	Wood UMETA(DisplayName = "Wood"), // 木头
+	Leather UMETA(DisplayName = "Leather"), // 皮革
+	Tendon UMETA(DisplayName = "Tendon"), // 肌腱
+	Rubber UMETA(DisplayName = "Rubber"), // 橡胶
+	Muscle UMETA(DisplayName = "Muscle"), // 肌肉
+	Fat UMETA(DisplayName = "Fat"), // 脂肪
 };
 
 /**
@@ -565,6 +565,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* 指定ボーンとそれ以下のボーンを制御対象に
 	* Control the specified bone and the bones below it
+	* 控制指定骨骼及其下方的骨骼
 	*/
 	UPROPERTY(EditAnywhere, Category = "Bones")
 	FBoneReference RootBone;
@@ -572,6 +573,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* 指定したボーンとそれ以下のボーンを制御対象から除去
 	* Do NOT control the specified bone and the bones below it
+	* 从控制目标中移除指定骨骼及其下方的骨骼
 	*/
 	UPROPERTY(EditAnywhere, Category = "Bones")
 	TArray<FBoneReference> ExcludeBones;
@@ -579,13 +581,15 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* 指定ボーンとそれ以下のボーンを制御対象に(追加用)
 	* Control the specified bone and the bones below it (For Addition)
+	* 控制指定骨骼及其子骨骼
 	*/
 	UPROPERTY(EditAnywhere, Category = "Bones")
 	TArray<FKawaiiPhysicsRootBoneSetting> AdditionalRootBones;
 
 	/** 
 	* 0より大きい場合は、制御ボーンの末端にダミーボーンを追加。ダミーボーンを追加することで、末端のボーンの物理制御を改善
-	* Add a dummy bone to the end bone if it's above 0. It affects end bone rotation. 
+	* Add a dummy bone to the end bone if it's above 0. It affects end bone rotation.
+	* 如果大于0, 则在控制骨骼的末尾添加一个虚拟骨骼, 这个将会影响 末端骨骼的朝向, 通过添加虚拟骨骼改进了末端骨骼的物理控制
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bones", meta = (PinHiddenByDefault, ClampMin = "0"))
 	float DummyBoneLength = 0.0f;
@@ -593,6 +597,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* ボーンの前方。物理制御やダミーボーンの配置位置に影響
 	* Bone forward direction. Affects the placement of physical controls and dummy bones
+	* 在骨头前面。影响物理控制和虚拟骨骼放置位置
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bones", meta = (PinHiddenByDefault))
 	EBoneForwardAxis BoneForwardAxis = EBoneForwardAxis::X_Positive;
@@ -600,6 +605,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* 物理制御の基本設定
 	* Basic physics settings
+	* 基础物理设置
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings",
 		meta = (PinHiddenByDefault, DisplayPriority=0))
@@ -608,6 +614,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* ターゲットとなるフレームレート
 	* Target Frame Rate
+	* 目标帧率
 	*/
 	UPROPERTY(EditAnywhere, Category = "Physics Settings", meta = (EditCondition = "OverrideTargetFramerate"))
 	int32 TargetFramerate = 60;
@@ -617,6 +624,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* 物理の空回し回数。物理処理が落ち着いてから開始・表示したい際に使用
 	* Number of times physics has been idle. Used when you want to start/display after physics processing has settled down
+	* 物理中恢复Idle 的CD时间大小, 当您想要在物理处理平静下来后开始/显示时使用。
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings",
 		meta = (PinHiddenByDefault, EditCondition="bNeedWarmUp", ClampMin = "0"))
@@ -624,6 +632,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* ResetDynamics時に物理の空回しを行うフラグ
 	* Flags to use warmup physics when ResetDynamics
+	* ResetDynamics 时标记为空闲物理
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings",
 		meta = (PinHiddenByDefault, EditCondition="bNeedWarmUp"))
@@ -636,6 +645,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* 1フレームにおけるSkeletalMeshComponentの移動量が設定値を超えた場合、その移動量を物理制御に反映しない
 	* If the amount of movement of a SkeletalMeshComponent in one frame exceeds the set value, that amount of movement will not be reflected in the physics control.
+	* 如果一帧中 SkeletalMeshComponent 的移动量超过设定值，该移动量将不会反映在物理控制中 (设计上应该是一个阈值, 防止物理模拟突变)
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings", meta = (PinHiddenByDefault))
 	float TeleportDistanceThreshold = 300.0f;
@@ -643,13 +653,15 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* 1フレームにおけるSkeletalMeshComponentの回転量が設定値を超えた場合、その回転量を物理制御に反映しない
 	* If the rotation amount of SkeletalMeshComponent in one frame exceeds the set value, the rotation amount will not be reflected in the physics control.
+	* 如果一帧内SkeletalMeshComponent的旋转量超过设定值，该旋转量将不会反映到物理控制中。
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings", meta = (PinHiddenByDefault))
 	float TeleportRotationThreshold = 10.0f;
 
 	/** 
 	* 指定した軸に応じた平面上に各ボーンを固定
-	* Fix the bone on the specified plane 
+	* Fix the bone on the specified plane
+	* 根据指定的轴将每个骨骼固定在一个平面上 (约束)
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings", meta = (PinHiddenByDefault))
 	EPlanarConstraint PlanarConstraint = EPlanarConstraint::None;
@@ -659,6 +671,8 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
  	* 無効にするとパフォーマンスが僅かに改善するが、実行中に物理パラメータを変更することが不可能に
 	* Flag to update the physics parameters of each bone every frame.
 	* Disabling this will slightly improve performance, but it will make it impossible to change physics parameters during execution.
+	* 标记每帧更新每个骨骼的物理参数。
+	* 禁用它会稍微提高性能，但无法在运行时更改物理参数。
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings", AdvancedDisplay,
 		meta = (PinHiddenByDefault))
@@ -667,6 +681,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* 制御対象のボーンが見つからない場合にTransformをリセットするフラグ。基本的には無効を推奨
 	* Flag to reset Transform when the controlled bone is not found. It is generally recommended to disable this.
+	* 如果未找到受控骨骼，则重置变换的标志。基本上，我们建议禁用
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings", AdvancedDisplay,
 		meta = (PinHiddenByDefault))
@@ -690,6 +705,8 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	* 「RootBoneから特定のボーンまでの長さ / RootBoneから末端のボーンまでの長さ」(0.0~1.0)の値におけるカーブの値を各パラメータに乗算
 	* Corrects the Physics Settings/Damping parameters applied to each bone.
 	* Multiplies each parameter by the curve value for "Length from RootBone to specific bone / Length from RootBone to end bone" (0.0~1.0).
+	* 修正了应用于每个骨骼的物理设置/阻尼参数
+	* 将每个参数乘以“RootBone到特定骨骼的长度/RootBone到末端骨骼的长度”值处的曲线值（0.0~1.0
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings", AdvancedDisplay,
 		meta = (PinHiddenByDefault, DisplayName = "Damping Rate by Bone Length Rate"))
@@ -700,6 +717,8 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	* 「RootBoneから特定のボーンまでの長さ / RootBoneから末端のボーンまでの長さ」(0.0~1.0)の値におけるカーブの値を各パラメータに乗算
 	* Corrects the Physics Settings/Stiffness parameters applied to each bone.
 	* Multiplies each parameter by the curve value for "Length from RootBone to specific bone / Length from RootBone to end bone" (0.0~1.0).
+	* 修正了应用于每个骨骼的物理设置/刚度参数。
+	* 将每个参数乘以“RootBone到特定骨骼的长度/RootBone到末端骨骼的长度”值处的曲线值（0.0~1.0）
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings", AdvancedDisplay,
 		meta = (PinHiddenByDefault, DisplayName = "Stiffness Rate by Bone Length Rate"))
@@ -710,6 +729,8 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	* 「RootBoneから特定のボーンまでの長さ / RootBoneから末端のボーンまでの長さ」(0.0~1.0)の値におけるカーブの値を各パラメータに乗算
 	* Corrects the Physics Settings/WorldDampingLocation parameters applied to each bone.
 	* Multiplies each parameter by the curve value for "Length from RootBone to specific bone / Length from RootBone to end bone" (0.0~1.0).
+	* 更正了应用于每个骨骼的物理设置/ WorldDampingLocation 参数。
+	* 将每个参数乘以“RootBone到特定骨骼的长度/RootBone到末端骨骼的长度”值处的曲线值（0.0~1.0）
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings", AdvancedDisplay,
 		meta = (PinHiddenByDefault, DisplayName = "World Damping Location Rate by Bone Length Rate"))
@@ -720,6 +741,8 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	* 「RootBoneから特定のボーンまでの長さ / RootBoneから末端のボーンまでの長さ」(0.0~1.0)の値におけるカーブの値を各パラメータに乗算
 	* Corrects the Physics Settings/WorldDampingRotation parameters applied to each bone.
 	* Multiplies each parameter by the curve value for "Length from RootBone to specific bone / Length from RootBone to end bone" (0.0~1.0).
+	* 更正了应用于每个骨骼的物理设置/WorldDampingRotation 参数。
+	* 将每个参数乘以“RootBone到特定骨骼的长度/RootBone到末端骨骼的长度”值处的曲线值（0.0~1.0）
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings", AdvancedDisplay,
 		meta = (PinHiddenByDefault, DisplayName = "World Damping Rotation Rate by Bone Length Rate"))
@@ -730,6 +753,8 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	* 「RootBoneから特定のボーンまでの長さ / RootBoneから末端のボーンまでの長さ」(0.0~1.0)の値におけるカーブの値を各パラメータに乗算
 	* Corrects the Physics Settings/CollisionRadius parameters applied to each bone.
 	* Multiplies each parameter by the curve value for "Length from RootBone to specific bone / Length from RootBone to end bone" (0.0~1.0).
+	* 更正了应用于每个骨骼的物理设置/碰撞半径参数。
+	* 将每个参数乘以“RootBone到特定骨骼的长度/RootBone到末端骨骼的长度”值处的曲线值（0.0~1.0）
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings", AdvancedDisplay,
 		meta = (PinHiddenByDefault, DisplayName = "Radius Rate by Bone Length Rate"))
@@ -740,6 +765,8 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	* 「RootBoneから特定のボーンまでの長さ / RootBoneから末端のボーンまでの長さ」(0.0~1.0)の値におけるカーブの値を各パラメータに乗算
 	* Corrects the Physics Settings/LimitAngle parameters applied to each bone.
 	* Multiplies each parameter by the curve value for "Length from RootBone to specific bone / Length from RootBone to end bone" (0.0~1.0).
+	* 更正了应用于每个骨骼的物理设置/LimitAngle 参数
+	* 将每个参数乘以“RootBone到特定骨骼的长度/RootBone到末端骨骼的长度”值处的曲线值（0.0~1.0）
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Settings", AdvancedDisplay,
 		meta = (PinHiddenByDefault, DisplayName = "LimitAngle Rate by Bone Length Rate"))
@@ -748,24 +775,28 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* コリジョン（球）
 	* Spherical Collision
+	* 球形 碰撞
 	*/
 	UPROPERTY(EditAnywhere, Category = "Limits")
 	TArray<FSphericalLimit> SphericalLimits;
 	/** 
 	* コリジョン（カプセル）
 	* Capsule Collision
+	* 胶囊碰撞
 	*/
 	UPROPERTY(EditAnywhere, Category = "Limits")
 	TArray<FCapsuleLimit> CapsuleLimits;
 	/** 
 	* コリジョン（ボックス）
 	* Box Collision
+	* 矩形碰撞
 	*/
 	UPROPERTY(EditAnywhere, Category = "Limits")
 	TArray<FBoxLimit> BoxLimits;
 	/** 
 	* コリジョン（平面）
 	* Planar Collision
+	* 平面碰撞
 	*/
 	UPROPERTY(EditAnywhere, Category = "Limits")
 	TArray<FPlanarLimit> PlanarLimits;
@@ -773,6 +804,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* コリジョン設定（DataAsset版）。別AnimNode・ABPで設定を流用したい場合はこちらを推奨
 	* Collision settings (DataAsset version). This is recommended if you want to reuse the settings for another AnimNode or ABP.
+	* 碰撞设置（DataAsset 版本）。如果您想在另一个 AnimNode/ABP 中重复使用这些设置，我们建议您这样做。
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limits", meta = (PinHiddenByDefault))
 	TObjectPtr<UKawaiiPhysicsLimitsDataAsset> LimitsDataAsset = nullptr;
@@ -780,6 +812,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* コリジョン設定（PhyiscsAsset版）。別AnimNode・ABPで設定を流用したい場合はこちらを推奨
 	* Collision settings (PhyiscsAsset版 version). This is recommended if you want to reuse the settings for another AnimNode or ABP.
+	* 碰撞设置（PhyiscsAsset 版本）。如果您想在另一个 AnimNode/ABP 中重复使用这些设置，我们建议您这样做。
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limits", meta = (PinHiddenByDefault))
 	TObjectPtr<UPhysicsAsset> PhysicsAssetForLimits = nullptr;
@@ -787,6 +820,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* コリジョン設定（DataAsset版）における球コリジョンのプレビュー
 	* Preview of sphere collision in collision settings (DataAsset version)
+	* 碰撞设置中球体碰撞的预览（DataAsset 版本
 	*/
 	UPROPERTY(VisibleAnywhere, AdvancedDisplay, Category = "Limits")
 	TArray<FSphericalLimit> SphericalLimitsData;
@@ -799,12 +833,14 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* コリジョン設定（DataAsset版）におけるボックスコリジョンのプレビュー
 	* Preview of box collision in collision settings (DataAsset version)
+	* 碰撞设置中胶囊碰撞的预览（DataAsset 版本）
 	*/
 	UPROPERTY(VisibleAnywhere, AdvancedDisplay, Category = "Limits")
 	TArray<FBoxLimit> BoxLimitsData;
 	/** 
 	* コリジョン設定（DataAsset版）における平面コリジョンのプレビュー
 	* Preview of planar collision in collision settings (DataAsset version)
+	* 碰撞设置中的平面碰撞预览（DataAsset 版本）
 	*/
 	UPROPERTY(VisibleAnywhere, AdvancedDisplay, Category = "Limits")
 	TArray<FPlanarLimit> PlanarLimitsData;
@@ -813,6 +849,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	* Bone Constraintで用いる剛性タイプ
 	* Stiffness type to use in Bone Constraint
 	* http://blog.mmacklin.com/2016/10/12/xpbd-slides-and-stiffness/
+	* 用于骨约束的刚性类型
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bone Constraint (Experimental)",
 		meta = (PinHiddenByDefault))
@@ -820,6 +857,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* Bone Constraintの処理回数（コリジョン処理前）
 	* Number of Bone Constraints processed before collision processing
+	* 骨骼约束处理计数（碰撞处理前）
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bone Constraint (Experimental)",
 		meta = (PinHiddenByDefault))
@@ -827,6 +865,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* Bone Constraintの処理回数（コリジョン処理後）
 	* Number of Bone Constraints processed after collision processing
+	* 骨骼约束处理次数（碰撞处理后
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bone Constraint (Experimental)",
 		meta = (PinHiddenByDefault))
@@ -834,6 +873,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* 末端ボーンをBoneConstraint処理の対象にした場合、自動的にダミーボーンも処理対象にするフラグ
 	* Flag to automatically processes dummy bones when the end bones are subject to BoneConstraint processing.
+	* 当末端骨骼受到 BoneConstraint 处理时自动包含虚拟骨骼的标志。
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bone Constraint (Experimental)",
 		meta = (PinHiddenByDefault))
@@ -842,6 +882,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* BoneConstraint処理の対象となるボーンのペアを設定。スカートのように、ボーン間の距離を維持したい場合に使用
 	* Sets the bone pair to be processed by BoneConstraint. Used when you want to maintain the distance between bones, such as a skirt.
+	* 设置要由 BoneConstraint 处理的骨骼对。当您想要保持骨骼之间的距离时使用，例如在裙子中
 	*/
 	UPROPERTY(EditAnywhere, Category = "Bone Constraint (Experimental)", meta=(TitleProperty="{Bone1} - {Bone2}"))
 	TArray<FModifyBoneConstraint> BoneConstraints;
@@ -849,6 +890,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* BoneConstraint処理の対象となるボーンのペアを設定 (DataAsset版）。別AnimNode・ABPで設定を流用したい場合はこちらを推奨
 	* Set the bone pairs to be processed by BoneConstraint (DataAsset version). If you want to reuse the settings for another AnimNode or another ABP, this is recommended.
+	* 设置要由 BoneConstraint（DataAsset 版本）处理的骨骼对。如果您想在另一个 AnimNode/ABP 中重复使用这些设置，我们建议您这样做。
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bone Constraint (Experimental)",
 		meta = (PinHiddenByDefault))
@@ -857,6 +899,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* BoneConstraint処理の対象となるボーンのペアのプレビュー
 	* Preview of bone pairs that will be processed by BoneConstraint
+	* 受 BoneConstraint 处理的骨骼对的预览
 	*/
 	UPROPERTY(VisibleAnywhere, Category = "Bone Constraint (Experimental)", AdvancedDisplay,
 		meta=(TitleProperty="{Bone1} - {Bone2}"))
@@ -867,6 +910,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* 外力（重力など）
 	* External forces (gravity, etc.)
+	* 重力大小
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExternalForce",
 		meta = (PinHiddenByDefault, DisplayName="External Force"))
@@ -879,6 +923,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* WindDirectionalSourceによる風の影響度。ClothやSpeedTreeとの併用目的
 	* Influence of wind by WindDirectionalSource. For use with Cloth and SpeedTree
+	* WindDirectionalSource 的风影响级别。 Cloth 和 SpeedTree 的使用目的
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExternalForce", meta = (EditCondition = "bEnableWind"),
 		meta = (PinHiddenByDefault))
@@ -887,6 +932,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* 外力のプリセット。C++で独自のプリセットを追加可能(Instanced Struct)
 	* External force presets. You can add your own presets in C++.
+	* 外力预设。您可以在 C++ 中添加自己的预设（实例结构）
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExternalForce",
 		meta = (BaseStruct = "/Script/KawaiiPhysics.KawaiiPhysics_ExternalForce", ExcludeBaseStruct))
@@ -898,6 +944,8 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	* 注意：AnimNodeをクリック or ABPをコンパイルしないと正常に動作しません
 	* External force presets. You can add your own presets in BP or C++
 	* Note: If you do not click on AnimNode or compile ABP, it will not work properly.
+	* 外力预设。您可以使用 BP/C++（实例属性）添加自己的预设
+	* 注意：除非点击AnimNode或者编译ABP，否则无法正常工作
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Instanced, Category = "ExternalForce",
 		meta=(DisplayName="CustomExternalForces(EXPERIMENTAL)"))
@@ -906,6 +954,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* レベル上の各コリジョンとの判定を行うフラグ。有効にすると物理処理の負荷が大幅に上がります
 	* Flag for collision detection with each collision on the level. Enabling this will significantly increase the load of physics processing.
+	* 确定关卡上每次碰撞的标志。启用此功能将显着增加物理处理负载。
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Collision", meta = (PinHiddenByDefault))
 	bool bAllowWorldCollision = false;
@@ -917,6 +966,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* SkeletalMeshComponentが持つコリジョン設定ではなく、独自のコリジョン設定をWorldCollisionで使用する際に設定
 	* Use custom collision settings in WorldCollision instead of the collision settings set in SkeletalMeshComponent.
+	* 使用 WorldCollision 时设置您自己的碰撞设置，而不是使用 SkeletalMeshComponent 的碰撞设置。
 	*/
 	UPROPERTY(EditAnywhere, Category = "World Collision",
 		meta = (PinHiddenByDefault, EditCondition = "bOverrideCollisionParams", DisplayName=
@@ -926,6 +976,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* WorldCollisionにて、SkeletalMeshComponentが持つコリジョン(PhysicsAsset)を無視するフラグ
 	* In WorldCollision, Flag to ignore collisions for SkeletalMeshComponent(PhysicsAsset) in WorldCollision
+	* 用于忽略 SkeletalMeshComponent 碰撞 (PhysicsAsset) 的 WorldCollision 标志
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Collision",
 		meta = (PinHiddenByDefault, EditCondition = "bAllowWorldCollision"))
@@ -934,6 +985,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* WorldCollisionにて、SkeletalMeshComponentが持つコリジョン(PhysicsAsset)を無視する設定（骨）
 	* In WorldCollision, set to ignore collision (PhysicsAsset) of SkeletalMeshComponent using bone
+	* 用于忽略 SkeletalMeshComponent（骨骼）碰撞的 WorldCollision 设置（PhysicsAsset）
 	*/
 	UPROPERTY(EditAnywhere, Category = "World Collision", meta = (EditCondition = "!bIgnoreSelfComponent"))
 	TArray<FBoneReference> IgnoreBones;
@@ -941,6 +993,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* WorldCollisionにて、SkeletalMeshComponentが持つコリジョン(PhysicsAsset)を無視する設定（骨名のプリフィックス）
 	* In WorldCollision, set to ignore collision (PhysicsAsset) of SkeletalMeshComponent using bone name prefix
+	* 用于忽略 SkeletalMeshComponent（骨骼名称前缀）碰撞的 WorldCollision 设置（PhysicsAsset）
 	*/
 	UPROPERTY(EditAnywhere, Category = "World Collision", meta = (EditCondition = "!bIgnoreSelfComponent"))
 	TArray<FName> IgnoreBoneNamePrefix;
@@ -948,6 +1001,7 @@ struct KAWAIIPHYSICS_API FAnimNode_KawaiiPhysics : public FAnimNode_SkeletalCont
 	/** 
 	* ExternalForceなどで使用するフィルタリング用タグ
 	* Tag for filtering of ExternalForce etc
+	* 过滤ExternalForce等中使用的标签
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tag")
 	FGameplayTag KawaiiPhysicsTag;
